@@ -1,0 +1,315 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>Visual jQuery</title>
+    <style type="text/css" media="screen">
+    <!--
+        BODY { margin: 10px; padding: 0; font: 1em "Trebuchet MS", verdana, arial, sans-serif; font-size: 100%; }
+        H1 { margin-bottom: 2px; }
+        DIV.container { margin: auto; width: 90%; margin-bottom: 10px;}
+        TEXTAREA { width: 80%;}
+        FIELDSET { border: 1px solid #ccc; padding: 1em; margin: 0; }
+        LEGEND { color: #ccc; font-size: 120%; }
+        INPUT, TEXTAREA { font-family: Arial, verdana; font-size: 125%; padding: 7px; border: 1px solid #999; }
+        LABEL { display: block; margin-top: 10px; } 
+        IMG { margin: 5px; }
+    -->
+    </style>
+    <link rel="stylesheet" href="new_vjq.css" type="text/css" />
+    <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    <!--
+    
+    $(document).bind('api-load-complete', function () {
+        // cache the original
+        window._jquerydocs = jquerydocs;
+        
+        // version notices
+        $('#version').html(jquerydocs.version);
+        document.title += ' ' + jquerydocs.version;
+        
+        // sort out alpha
+        updateAlpha();
+        
+        loadCategories();
+    });
+    
+    function updateAlpha() {
+        if (!updateAlpha.letters) updateAlpha.letters = jquerydocs.letters;
+        
+        var alphaEl = $('#alpha').click(function (ev) {
+            if (ev.target.nodeName == 'A') {
+                $('#query').val(ev.target.innerHTML);
+                queryDocs();
+                return false;
+            }
+        }).empty();
+        
+        var letters = [];
+        for (var i = 0; i < jquerydocs.letters.length; i++) {
+            letters.push('<li><a href="#?q=' + jquerydocs.letters[i] + '">' + jquerydocs.letters[i].toUpperCase() + '</a></li>');
+        }
+        
+        alphaEl.append(letters.join(''));
+    }
+    
+    $(function () {
+        var timer = null;
+        var last = '';
+        $('#query').focus().keyup(function () {
+            if (this.value != last) {
+                if (timer) clearTimeout(timer);
+                last = this.value;
+                timer = setTimeout(queryDocs, 250);
+            } 
+        }); 
+    });
+    
+    function queryDocs() {
+        if (jquerydocs == null) return;
+        jquerydocs = _jquerydocs; // reset
+        
+        // the query trimmed
+        var q = $('#query').val().toLowerCase().replace( /^\s+|\s+$/g,"");
+
+        if (q == '') {
+            loadCategories();
+            return;
+        }
+
+        jquerydocs = jquerydocs.find(q);
+        loadCategories();
+        showFunctions(jquerydocs, $('#wrapper')); // function because we get reused.
+    }
+    
+    
+    function loadCategories() {
+        var html = [];
+        var categories = jquerydocs.categories;
+        for (var i = 0; i < categories.length; i++) {
+            html.push('<dt id="' + i + '">' + categories[i].name + '</dt>');
+        }
+        
+        var $wrapper = $('#wrapper').html('<dl id="categories">' + html.join('') + '</dl>'),
+            $categories = $('#categories'),
+            $path = $('#current-path'),
+            blank_iframe = '/index-blank.html';
+        
+        $wrapper.click(function (event) {
+            categories = jquerydocs.categories;
+            var dt = (event.target.nodeName == 'DT'),
+                $selected = $(event.target),
+                step = 210,
+                i, j, // loop indices
+                q = $selected.text(), // search term
+                items, // matches
+                item, // specific function
+                argsA = [],
+                args = '',
+                html = [],
+                offset, size; // required for sliding effect
+
+            if (dt) {
+                
+                $selected.parent().find('dt').removeClass('active');
+                $selected.addClass('active');
+
+                // sliding effect from original Visual jquery
+                offset = $selected.offset();
+                // if ((offset.left + offset.width) > $('body').offset().width) jQuery.visual.slideRight();
+                size = (-1 * ($("#wrapper > dl, #wrapper > dd").length));
+                if ((offset.width < 350 || (offset.left + offset.width) > $("body").offset().width) && ($.visual.pane - 1) > size) {
+                    $.visual.slideRight(1); 
+                }
+                
+                
+                if ($selected.parents('#categories').length) { // category selected
+                    var category = $selected.attr('id');
+                
+                    $categories.find('dt').removeClass('active');
+                    $selected.addClass('active');
+                    $wrapper.find('> dl:not(#categories), dd').remove();
+            
+                    if (jquerydocs.categories[category].subcategories && jquerydocs.categories[category].subcategories.length) {
+                        for (i = 0; i < categories[category].subcategories.length; i++) {
+                            html.push('<dt>' + categories[category].subcategories[i] + '</dt>');
+                        }
+
+                        step = (200 * $wrapper.find('dl').length) + 10;
+                        $wrapper.append('<dl id="subcategories" class="absolute" style="left: ' + step + 'px;">' + html.join('') + '</dl>');
+                    }
+                } else if ($selected.parents('#subcategories').length) { // subcategory selected
+                    items = jquerydocs.find(q, 'subcategory');
+                    showFunctions(items, $wrapper); // function because we get reused.
+                } else if ($selected.parents('#functions').length) { // function selected
+                    item = jquerydocs.data[$selected.attr('id')];
+                    
+                    $wrapper.find('> #function').remove();
+                                        
+                    html.push('<p class="cheat" />');
+                    html.push('<h1>' + q + '</h1>');
+                    html.push(item.longdesc || '<p>' + item.desc + '</p>'); // longdesc is usally HTML
+                    html.push('<h2>Returns</h2>');
+                    html.push('<p>' + item['return'] + '</p>');
+                    
+                    if (item.params.length) {
+                        html.push('<h2>Parameters</h2>');
+                        html.push('<ul>');
+                        for (i = 0; i < item.params.length; i++) {
+                            html.push('<li><strong>' + item.params[i].name + '</strong> ');
+                            if (item.params[i].type) {
+                                html.push('(' + item.params[i].type + ')');
+                            }
+                            html.push(': ' + item.params[i].desc + '</li>');
+                        }
+                        html.push('</ul>');
+                    }
+
+                    for (i = 0; i < item.examples.length; i++) {
+                        html.push('<h2>Example</h2>');
+                        if (item.examples[i].desc) html.push('<p>' + item.examples[i].desc + '</p>');
+                        html.push('<h3>jQuery Code</h3>');
+                        html.push('<pre>' + item.examples[i].htmlCode + '</pre>');
+                        
+                        // this is special code that will convert in to a real running example once run through 'runExample(item)'
+                        if (item.examples[i].html) {
+                            html.push('<div style="position: relative;"><iframe id="' + item.examples[i].exampleId + '" class="example" src="' + blank_iframe + '"></iframe></div>');
+                        }
+                    }
+                    
+                    step = (200 * $wrapper.find('dl').length) + 10;
+                    $wrapper.append('<dd id="function" class="text absolute" style="left: ' + step + 'px;">' + html.join('') + '</dd>');
+                    fixLinks($wrapper.find('dd')); // makes links to more docs absolute rather than relative (should do in the api-docs.js)
+                    runExample(item);
+                }
+                
+                $path.html($.map($('dt.active'), function(i) { return i.innerHTML; }).join("/"));
+                $.visual.setArrows();
+            }
+        });
+    }
+    
+    function showFunctions(items, $wrapper) {
+        var argsA = [],
+            args,
+            html = [],
+            step,
+            i, j;
+        
+        $wrapper.find('> #functions, dd').remove();
+
+        for (i = 0; i < items.length; i++) {
+            argsA = [];
+            args = '';
+        
+            if (items[i].params.length) {
+                for (j = 0; j < items[i].params.length; j++) {
+                    argsA.push(items[i].params[j].name);
+                }
+                args = argsA.join(', ');
+            }
+            html.push('<dt id="' + items[i].searchname + items[i].id + '" class="direct">' + items[i].name + '(' + args + ')</dt>');
+        }
+
+        step = (200 * $wrapper.find('dl').length) + 10;
+        $wrapper.append('<dl id="functions" class="absolute" style="left: ' + step + 'px;">' + html.join('') + '</dl>');
+    }
+    
+    
+    // original Visual jQuery effects code
+    $(function () {
+        $.visual = { pane: 0 };
+        $.visual.slideRight = function(again) {
+            if(!$.visual.allRight()) {
+                $("#wrapper > dl, #wrapper > dd").each(function () {
+                    var $el = $(this);
+                    $el.animate({ 
+                        left: parseInt($el.css("left")) - 201
+                    }, 500, function() {
+                        if (!$el.is(".absolute")) {
+                            var size = (-1 * ($("#wrapper > dl, #wrapper > dd").length));
+                            if (($("dd.text:visible").length != 0) && $("dd.text:visible").offset().width < 350 && (($.visual.pane - 1) > size) && again) {
+                                $.visual.slideRight(1);
+                            }
+                        }
+                    });
+                });
+                $.visual.pane -= 1;
+            }
+            $.visual.setArrows();
+        };
+
+        $.visual.slideLeft = function() {
+            if(!$.visual.allLeft()) {
+                var c = $("dd.text:visible");
+                if ((c.length != 0) && ($("dd.text:visible").offset().width - 200) < 200) {
+                    $("dd.text:visible").remove();
+                    $("#wrapper > dl:visible:last dt.active").removeClass("active");
+                    $("#current-path").html($.map($("dt.active:visible"), function(i) { return i.innerHTML; }).join("/"));
+                }
+                $("#wrapper > dl, #wrapper > dd").each(function () {
+                    var $this = $(this);
+                    $this.animate({ 
+                        left: parseInt($this.css("left")) + 201
+                    },500); 
+                });
+                
+                $.visual.pane += 1;
+            }
+            
+            $.visual.setArrows();
+        };
+
+        $.visual.setArrows = function() {
+            $("#left-button").css("display", $.visual.allLeft() ? "none" : "");
+            $("#right-button").css("display", $.visual.allRight() ? "none" : "");
+        };
+
+        $.visual.allLeft = function() {
+            return ($.visual.pane == 0);
+        };
+
+        $.visual.allRight = function() {
+            return ($.visual.pane - 1) == (-1 * ($("#wrapper > dl, #wrapper > dd").length));
+        };
+
+        $("a#left-button").click($.visual.slideLeft);
+        $("a#right-button").click($.visual.slideRight);
+
+        $.visual.setArrows();
+        
+        $(document).keydown( function(e) {
+            var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+            switch(key) {
+                case 37:
+                    if (e.ctrlKey) $.visual.slideLeft();
+                    break;
+                case 39:
+                    if (e.ctrlKey) $.visual.slideRight();
+                    break;
+            }
+        });
+    });
+    
+    //-->
+    </script>
+</head>
+<body>
+    <div id="footer">
+        <a id="left-button" style="display: none;"><img src="images/arrow-back_16.gif"/></a><a id="right-button" style="display: none;"><img src="images/arrow-forward_16.gif"/></a><p id="header">jQuery <span id="version"></span> (Updated by <a href="http://remysharp.com">Remy Sharp</a> originally by <a href="http://yehudakatz.com/">Yehuda Katz</a>)</p>
+        <p id="current-path"></p>
+    </div>
+    <div id="search">
+        <label for="query">Filter:</label> <input type="text" name="q" id="query" size="15" />
+        <ul id="alpha"></ul>
+    </div>
+    <div id="wrapper"></div>
+    <script src="api-loader.js" type="text/javascript"></script>
+    <script src="api-docs-1.3.js" type="text/javascript"></script>
+</body>
+</html>
+
+
+
+
+

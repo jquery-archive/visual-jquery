@@ -1,0 +1,207 @@
+body {
+  background-color: #000;
+  color: #fff;
+  font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+  font-size: 62.5%;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+a {
+  color: #fff;
+  font-weight: bold;
+}
+
+iframe.example {
+  border: 1px dotted rgb(204, 204, 204); 
+  width: 100%; 
+  height: 125px;
+  margin-bottom: 10px;
+}
+
+#wrapper {
+  position: absolute;
+  overflow: auto;
+  top: 50px;
+  bottom: 0;
+  width: 100%;
+  height: expression((document.body.clientHeight - 20 + "px"));
+}
+
+#footer {
+/*  position: absolute;*/
+/*  top: 0px;*/
+  width: 100%;
+  background-color: #933;
+  height: 20px;
+  overflow: hidden;
+}
+
+#search {
+  clear: left;
+  padding: 3px;
+  background-color: #933;
+  font-size: 1.2em;
+  line-height: 20px;
+  font-weight: bold;
+  position: relative;
+}
+
+#search #query {
+  padding: 3px;
+  font-family: helvetica, arial;
+  font-size: 140%;
+  vertical-align: middle;
+  font-weight: normal;
+}
+
+#search label {
+  float: left;
+  padding-right: 10px;
+  margin-left: 20px;
+}
+
+body * {
+  margin: 0;
+  padding: 0;
+}
+
+dt {
+  background-image: url(images/header.png);
+  width: 191px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  font-size: 1.2em;
+  cursor: pointer;
+}
+
+dl {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+dl dd {
+  margin-left: 0;
+  display: none;
+}
+
+.absolute dt {
+  background-image: url(images/grey-button.png);
+}
+
+dt.direct {
+  background-image: url(images/blue-button.png);
+  overflow: hidden;
+}
+
+dl.absolute {
+  position: absolute;
+  margin-left: 0;
+}
+
+dd.text {
+  background-color: #48b;
+  padding: 0.5em;
+  font-size: 1.2em;
+  margin-right: 0.5em;
+  height: auto;
+  top: 10px;
+  position: absolute;
+}
+
+dd.text p, dd.text h1, dd.text h2, dd.text h3, dd.text ul, dd.text pre {
+  margin-bottom: 0.5em;
+}
+
+dd.text h1 {
+  font-weight: bold;
+  border-bottom: 1px solid #ccc;
+  font-size: 1em;
+}
+
+dd.text h2 {
+  padding: 0.5em;
+  background-color: #269;
+  text-align: center;
+  font-size: 1em;
+}
+
+dd.text h3 {
+  font-size: 1em;
+}
+
+dd.text ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+dd.text li {
+  margin-bottom: 0.5em;
+}
+
+dd.text pre {
+  background-color: #269;
+  padding: 0.5em;
+  white-space: pre;
+  overflow: auto;
+  font-size: 1.2em;
+}
+
+.cheat {
+  float: right;
+}
+
+dt.active {
+	-moz-opacity: 0.5;
+	opacity: 0.5;
+	filter: alpha(opacity=50);
+}
+
+#left-button, #right-button {
+  margin-top: 2px;
+}
+
+#left-button {
+  float: left;
+  margin-left: 1px;
+}
+
+#right-button {
+  float: right;
+  margin-right: 1px;
+}
+
+#footer p {
+  text-align: center;
+  line-height: 20px;
+  font-weight: bold;
+  font-size: 1.2em;
+  width: 46%;
+  float: left;
+}
+
+#footer a {
+  color: #8cf;
+}
+
+#footer a:hover {
+  color: #6ad;
+}
+
+#alpha {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: inline;
+}
+
+#alpha li {
+    display: inline;
+  margin-right: 5px;
+}
